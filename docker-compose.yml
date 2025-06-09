@@ -1,0 +1,11 @@
+services:
+
+  postgres:
+    image: postgres # a imagem e o que meu conteine vai ter instalado 
+    container_name: postgresdb # nome do conteine 
+    environment: # variabel de ambiente 
+      POSTGRES_USER: valdianodb
+      POSTGRES_PASSWORD: passworddb
+      POSTGRES_DB: nestdb
+    ports: # porta do conteine 
+      - "5432:5432" # nomero da porta de entrada e saida 
