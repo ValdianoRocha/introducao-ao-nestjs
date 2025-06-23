@@ -6,7 +6,10 @@ console.log(Porta);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen( Porta ?? 3000);
+  await app.listen( Porta ?? 3000, ()=>{
+    console.log(`localhost:${Porta}`);
+    
+  });
 
 }
 bootstrap();

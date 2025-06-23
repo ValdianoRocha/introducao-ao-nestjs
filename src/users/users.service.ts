@@ -1,41 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
+import { promises } from 'dns';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
+    constructor(private prisma: PrismaService) { }
 
-    //banco de dados fake
-    private users = [
-    {id:1,name:'joão',email:'joao@gmail.com'},
-    {id:2,name:'Maria',email:'maria@gmail.com'}
-    ]
+    async create(data: Prisma.UserCreateInput): Promise<User> {
+        return this.prisma.user.create({ data });
+    }
 
-   findAllUser():{id:number,name:string,email:string}[]{
-    return this.users
-   } 
+    async findAll(): Promise<User[]> {
+        return this.prisma.user.findMany()
+    }
 
-   findIdUser(id:number):{id:number,name:string,email:string} | undefined{
-    const user = this.users.find((user)=>user.id===id)
-    return user
-   }
+    async findOne(id: string): Promise<User | null> {
+        const foundUser = await this.prisma.user.findUnique({
+            where: { id }
+        })
 
-   createUser(name:string,email:string){
-    const newUser = this.users.push({
-        id:this.users.length+1,
-        name,
-        email
-    })
-    console.log(newUser);
-    
-    return newUser
-   }
+        if (!foundUser) {
+            //lancar um erro
+            throw new NotFoundException(`Usuário com o ID ${id} não encontrado!`)
+        }
+        return foundUser
+    }
 
-   atualizaUsuario(id:number,name:string,email:string){
-    const updateUser = this.users.splice(id-1,1,{id,name,email})
-    return updateUser
-   }
+    async update(id: string, userData: Prisma.UserUpdateInput): Promise<User | null> {
+        const updateUser = await this.prisma.user.update({
+            where: { id },
+            data: userData
+        })
+        if (!updateUser) {
+            throw new NotFoundException(`Usuário com o ID ${id} não encontrado!`)
+        }
+        return updateUser
+    }
 
-   deletarUsuario(id:number){
-    const deleteUser = this.users.splice(id-1,1)
-    return deleteUser 
-   }
+    async remove(id: string): Promise<User | null> {
+        try {
+            return await this.prisma.user.delete({
+                where: { id }
+            })
+
+        } catch (error) {
+            throw new NotFoundException(`Usuário com o ID ${id} não encontrado!`)
+        }
+    }
+
 }
