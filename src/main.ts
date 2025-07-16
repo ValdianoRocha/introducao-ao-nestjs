@@ -4,9 +4,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 
 
-const Porta = process.env.PORT
-// console.log(Porta);
-
 async function bootstrap() {
 
   const PORT = 3756
