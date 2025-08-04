@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, BadRequestException, UseInterceptors, UploadedFiles, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, BadRequestException, UseInterceptors, UploadedFiles, Put, Query } from '@nestjs/common';
 import { PlaceService } from './place.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { CloudinaryService } from './cloudinary.service';
 import { File as MulterFile } from 'multer'
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiConsumes, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { UpdatePlaceDto } from './dto/update-place.dto';
+import { PaginatioDto } from './dto/pagination.dto';
 
 @Controller('place')
 export class PlaceController {
@@ -60,6 +61,15 @@ export class PlaceController {
   @Get()
   async findAll() {
     return this.placeService.findAll();
+  }
+
+  @Get('pagineted')
+  @ApiOperation({ summary: 'Lista locais paginados' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  async pagination(@Query() pagination: PaginatioDto) {
+    return this.placeService.findPaginated(pagination.page, pagination.limit)
+    // return { ola: "teste" }
   }
 
   @Get(':id')

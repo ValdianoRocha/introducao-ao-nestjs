@@ -27,9 +27,32 @@ export class PlaceService {
     return this.prisma.place.findMany()
   }
 
+  async findPaginated(page: number, limit: number) {
+    // const skip = (page - 1) * limit
+
+    const [places, total] = await this.prisma.$transaction([
+      this.prisma.place.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { created_at: 'desc' }
+      }),
+      this.prisma.place.count(),
+    ]);
+
+    return {
+      data: places,
+      meta: {
+        total,
+        page,
+        lastPage: Math.ceil(total / limit)
+      }
+    }
+
+  }
+
   async findOne(id: string) {
     return this.prisma.place.findUnique({
-      where: {id}
+      where: { id }
     })
   }
 

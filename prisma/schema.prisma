@@ -16,19 +16,20 @@ model User {
   id       String   @id @default(uuid())
   name     String
   email    String   @unique
-  password String
+  password String?
+  googleID String?  @unique
   role     UserRole @default(TURISTA)
 }
 
-
 model Place {
-  id String @id @default(uuid())
-  name String
-  type placeType
-  phone String
-  latitude Float
+  id        String    @id @default(uuid())
+  name      String
+  type      placeType
+  phone     String
+  latitude  Float
   longitude Float
-  images Json[]
+  images    Json[]
+  created_at DateTime @default(now())
 }
 
 enum placeType {
