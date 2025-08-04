@@ -10,3 +10,26 @@ services:
     ports: # porta do conteine 
       - "5432:5432" # nomero da porta de entrada e saida 
 #a porta da esquerda 5432 se der erro pode ser mudada, ja a porta da direita :5432 e padrão
+
+
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: nest-api
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on: #esta dizendo que esse serviço depende o serviço "postgres"
+      -  postgres
+    environment: # cria as variaves que estão no ".env"
+      DATABASE_URL: ${DATABASE_URL_CONTAINER}
+      JWT_SECRET: ${JWT_SECRET}
+      # Cloudinary Keys
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    command: sh -c "npx prisma migrate deploy && npm run start:prod" # Aqui ele esta executando 2 comando um para gerar a migraçã do prisma e outro rodar em modo produção
+
+    

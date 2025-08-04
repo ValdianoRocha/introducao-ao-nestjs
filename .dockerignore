@@ -1,0 +1,4 @@
+# Arquivos que vou ignorar para o docker
+/dist
+/node_modules
+/build

@@ -1,0 +1,30 @@
+# arquivo para descrever o que a imagem tem que ter, tipo receita de bolo
+
+# Etapa 1: Definir imagem base do Node;
+FROM node:20-alpine
+
+# Etapa 2:  Definir o diretorio de trabalho do conteine;
+WORKDIR /app
+
+# Etapa 3: Copiar arquivos de depêdencias e instalar;
+# O "packege.json" é a origem e o "/." e o arquivo atual onde vai ser instalado
+COPY package.json ./
+# O "packeage-lock.json" é a origem e o "/." e o arquivo atual onde vai ser instalado
+COPY package-lock.json ./
+# ou "COPY packeage* /." significa que tudo que começar com packeage seja copiado e colado em "/."
+# Agora para instalar:
+RUN npm install
+# ou "npm i"
+
+# Etapa 4: Copiar o restantre dos arquivos e copilar;
+COPY . .
+# Comando para gerar o prisma-cli
+RUN npx prisma generate
+# Rodar?
+RUN npm run build
+
+# Etapa 5: Expor a porta da aplicação;
+EXPOSE 3000
+# chamando do .env
+# EXPOSE ${PORT}
+

@@ -6,7 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
 
-  const PORT = 3756
+  const porta = process.env.PORT || 3000
   const app = await NestFactory.create(AppModule)
   const config = new DocumentBuilder() //vai gerar um documento com base nas informaçoes que vamos passar 
     .setTitle('API de user') // titulo
@@ -36,8 +36,8 @@ async function bootstrap() {
     })
   )
 
-  await app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}/api`);
+  await app.listen(porta, () => {
+    console.log(`http://localhost:${porta}/api`);
   });
 }
 
