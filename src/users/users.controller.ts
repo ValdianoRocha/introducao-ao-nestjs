@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, Put, Delete, UseGuards } from '@nes
 import { UsersService } from './users.service'
 import { createUserDto } from './user.dto';
 import { ApiBasicAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/dto/jwt.guard';
+import { JwtAuthGuard } from '../auth/dto/jwt.guard';
 
 
 @UseGuards(JwtAuthGuard)
