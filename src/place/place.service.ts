@@ -93,7 +93,7 @@ export class PlaceService {
     })
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<Place> {
     //verifica se existe o local
     const place = await this.prisma.place.findUnique({
       where: { id }
@@ -108,8 +108,10 @@ export class PlaceService {
     ))
 
     // apaga o local no banco de dados
-    await this.prisma.place.delete({
+    const result = await this.prisma.place.delete({
       where: { id }
     })
+
+    return result
   }
 }
