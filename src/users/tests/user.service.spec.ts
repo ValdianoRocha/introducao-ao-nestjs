@@ -1,8 +1,8 @@
 //testando as funções do service de user
 
 import { Test, TestingModule } from "@nestjs/testing";
-import { UsersService } from "./users.service";
-import { PrismaService } from "../prisma/prisma.service";
+import { UsersService } from "../users.service";
+import { PrismaService } from "../../prisma/prisma.service";
 import { NotFoundException } from "@nestjs/common";
 
 

@@ -1,0 +1,227 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { PlaceController } from "../place.controller";
+import { PlaceService } from "../place.service";
+import { CloudinaryService } from "../cloudinary.service";
+import { placeType } from "@prisma/client";
+import { File as MulterFile } from 'multer'
+
+
+const mockPlaceService = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
+}
+
+const mockCloudinaryService = {
+    uploadImage: jest.fn().mockResolvedValue({ url: "url", public_id: "public_id" }),
+    deleteImage: jest.fn(),
+}
+
+describe("PlaceController", () => {
+    let testPlaceController: PlaceController
+    let place
+
+    beforeEach(async () => {
+        const module: TestingModule = await Test.createTestingModule({
+            controllers: [PlaceController],
+            providers: [
+                {
+                    provide: PlaceService,
+                    useValue: mockPlaceService,
+                }, {
+                    provide: CloudinaryService,
+                    useValue: mockCloudinaryService
+                },
+            ],
+        }).compile()
+
+        testPlaceController = module.get<PlaceController>(PlaceController)
+    })
+
+
+    //test create do controller
+    it("deve criar um place!", async () => {
+        const data = {
+            id: "acb123",
+            name: "valdiano",
+            type: placeType.BAR,
+            phone: "123456789",
+            latitude: 12.12345,
+            longitude: 98.98765,
+            images: [{
+                url: "url",
+                public_id: "public_id"
+            }]
+        }
+        const newPlace = { name: "valdiano", type: placeType.BAR, phone: "123456789", latitude: 12.12345, longitude: 98.98765 }
+        type receivedimages = { images?: MulterFile[] }
+        /** const images
+         * O .buffer vem de objetos do tipo MulterFile (ex.: { buffer: <Buffer ...> }).
+         * Isso não é um MulterFile e não tem buffer.
+         * No teste, para simular corretamente, deveria ser algo como:
+         */
+        const images = {
+            images: [
+                { buffer: Buffer.from("01010101") } as unknown as MulterFile,
+                { buffer: Buffer.from("01010101") } as unknown as MulterFile,
+                { buffer: Buffer.from("01010101") } as unknown as MulterFile,
+            ]
+        }
+        const imagesAfterCloudinary = [
+            {
+                url: "url",
+                public_id: "public_id"
+            },
+            {
+                url: "url",
+                public_id: "public_id"
+            },
+            {
+                url: "url",
+                public_id: "public_id"
+            }
+        ]
+
+        mockPlaceService.create.mockResolvedValue(data)
+
+        const result = await testPlaceController.create(newPlace, images as receivedimages)
+
+        expect(result).toEqual(data)
+        //O seu controller, ele manda um único objeto com todas as propriedades (incluindo images), não dois parâmetros separados.
+        //O correto seria:
+        expect(mockPlaceService.create).toHaveBeenCalledWith({
+            ...newPlace,
+            images: imagesAfterCloudinary
+        })
+    })
+
+
+    it("deve trazes todos os places cadatrados", async () => {
+        const data = [
+            {
+                id: "p1",
+                name: "Bar do João",
+                type: placeType.BAR,
+                phone: "11999999999",
+                latitude: -23.55052,
+                longitude: -46.633308,
+                images: [
+                    { url: "https://example.com/bar1.jpg", public_id: "bar1_img" }
+                ]
+            }, {
+                id: "p2",
+                name: "Pizzaria da Maria",
+                type: placeType.RESTAURANTE,
+                phone: "21988888888",
+                latitude: -22.906847,
+                longitude: -43.172896,
+                images: [
+                    { url: "https://example.com/pizza1.jpg", public_id: "pizza1_img" }
+                ]
+            }, {
+                id: "p3",
+                name: "Café Central",
+                type: placeType.HOTEL,
+                phone: "31977777777",
+                latitude: -19.916681,
+                longitude: -43.934493,
+                images: [
+                    { url: "https://example.com/cafe1.jpg", public_id: "cafe1_img" }
+                ]
+            }
+        ]
+
+        mockPlaceService.findAll.mockResolvedValue(data)
+
+        const result = await testPlaceController.findAll()
+
+        expect(result).toEqual(data)
+        expect(mockPlaceService.findAll).toHaveBeenCalledWith()
+    })
+
+
+    it("deve trazer um place unico", async () => {
+        const data = {
+            id: "acb123",
+            name: "valdiano",
+            type: placeType.BAR,
+            phone: "123456789",
+            latitude: 12.12345,
+            longitude: 98.98765,
+            images: [{
+                url: "url",
+                public_id: "public_id"
+            }]
+        }
+
+        mockPlaceService.findOne.mockResolvedValue(data)
+
+        const result = await testPlaceController.findOne(data.id)
+        expect(result).toEqual(data)
+        expect(mockPlaceService.findOne).toHaveBeenCalledWith(data.id)
+    })
+
+
+    it("deve atualizar um place com novas imagens", async () => {
+        const id = "place123";
+        const updatePlaceDto = {
+            name: "Bar do Pedro",
+            type: placeType.BAR,
+            phone: "11999999999",
+            latitude: -23.55,
+            longitude: -46.63,
+        };
+        const files = {
+            images: [
+                { buffer: Buffer.from("img1") } as MulterFile,
+                { buffer: Buffer.from("img2") } as MulterFile,
+            ],
+        };
+        const updatedPlace = {
+            id,
+            ...updatePlaceDto,
+            images: [
+                { url: "url1", public_id: "id1" },
+                { url: "url2", public_id: "id2" },
+            ],
+        };
+
+        mockPlaceService.update.mockResolvedValue(updatedPlace);
+
+        const result = await testPlaceController.update(id, updatePlaceDto, files);
+
+        expect(result).toEqual(updatedPlace);
+        expect(mockPlaceService.update).toHaveBeenCalledWith(
+            id,
+            updatePlaceDto,
+            [Buffer.from("img1"), Buffer.from("img2")]
+        );
+    });
+
+
+
+    it("deve deletar um place", async () => {
+        const data = {
+            id: "acb123",
+            name: "valdiano",
+            type: placeType.BAR,
+            phone: "123456789",
+            latitude: 12.12345,
+            longitude: 98.98765,
+            images: [{
+                url: "url",
+                public_id: "public_id"
+            }]
+        }
+
+        mockPlaceService.remove.mockResolvedValue(data)
+
+        const result = await testPlaceController.remove(data.id)
+
+        expect(result).toEqual(data)
+        expect(mockPlaceService.remove).toHaveBeenCalledWith(data.id)
+    })
+
+})

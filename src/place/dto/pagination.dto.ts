@@ -3,7 +3,7 @@ import { Type } from "class-transformer"
 import { IsNumber, IsOptional, IsPositive, Max, Min } from "class-validator"
 
 
-export class PaginatioDto {
+export class PaginationDto {
 
     @ApiPropertyOptional({ description: 'Número da página atual', default: 1 })
     @IsNumber()
