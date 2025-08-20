@@ -6,7 +6,7 @@ import { File as MulterFile } from 'multer'
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiOperation, ApiResponse, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { UpdatePlaceDto } from './dto/update-place.dto';
-import { PaginatioDto } from './dto/pagination.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('place')
 export class PlaceController {
@@ -49,7 +49,7 @@ export class PlaceController {
   ) {
 
     if (!files.images || files.images.length === 0) {
-      throw new BadRequestException('Pelo menos ima imagem deve ser enviada')
+      throw new BadRequestException('Pelo menos uma imagem deve ser enviada')
     }
 
     const imagesUrls = await Promise.all(
@@ -67,7 +67,7 @@ export class PlaceController {
   @ApiOperation({ summary: 'Lista locais paginados' })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
-  async pagination(@Query() pagination: PaginatioDto) {
+  async pagination(@Query() pagination: PaginationDto) {
     return this.placeService.findPaginated(pagination.page, pagination.limit)
     // return { ola: "teste" }
   }
@@ -77,6 +77,7 @@ export class PlaceController {
     return this.placeService.findOne(id);
   }
 
+  @Put(':id')
   @UseInterceptors( // midwrere  interceptação das requisiçoes
     FileFieldsInterceptor([{ name: 'images', maxCount: 3 }]))
   @ApiConsumes('multipart/form-data')
@@ -104,7 +105,6 @@ export class PlaceController {
       },
     },
   })
-  @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() updatePlaceDto: UpdatePlaceDto,
